@@ -1,0 +1,97 @@
+
+
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  ext_expires_in    Int?
+  token_type        String?
+  scope             String?
+  id_token         String? @db.Text
+  session_state    String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id                    String          @id @default(cuid())
+  name                  String?
+  email                 String?         @unique
+  emailVerified         DateTime?
+  image                 String?
+  access_token         String?
+  accounts              Account[]
+  sessions              Session[]
+  calendarSyncs         CalendarSync[]
+  calendarAccounts      CalendarAccount[]
+  subscriptionId        String?
+  subscriptionStatus    String?
+  subscriptionExpiresAt DateTime?
+}
+
+model CalendarSync {
+  id                String   @id @default(cuid())
+  userId            String
+  sourceCalendarId  String
+  targetCalendarId  String
+  hideDetails       Boolean  @default(true)
+  weekdaysOnly      Boolean  @default(true)
+  workingHoursStart String   @default("09:00")
+  workingHoursEnd   String   @default("17:00")
+  roundToNearest    Int      @default(15)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sourceAccount     CalendarAccount @relation("SourceCalendar", fields: [sourceCalendarId], references: [calendarId])
+  targetAccount     CalendarAccount @relation("TargetCalendar", fields: [targetCalendarId], references: [calendarId])
+}
+
+model CalendarAccount {
+  id                String   @id @default(cuid())
+  userId            String
+  provider          String   // e.g., "google", "outlook", etc.
+  email             String
+  calendarId        String   @unique  // unique identifier for the calendar
+  name              String?  // display name for the calendar
+  color             String?  // calendar color
+  accessToken       String   @db.Text
+  refreshToken      String   @db.Text
+  tokenExpiresAt    DateTime
+  isDefault         Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sourceCalendars   CalendarSync[] @relation("SourceCalendar")
+  targetCalendars   CalendarSync[] @relation("TargetCalendar")
+
+  @@unique([userId, calendarId])
+}
