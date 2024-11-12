@@ -8,7 +8,6 @@ export class MicrosoftGraph {
         }
       });
       const data = await response.json();
-      console.log(data);
       return data.value.map((calendar: any) => ({ id: calendar.id, name: calendar.name }));
     }
   

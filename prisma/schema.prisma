@@ -1,9 +1,5 @@
-
-
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
   provider = "prisma-client-js"
@@ -30,6 +26,8 @@ model Account {
   id_token         String? @db.Text
   session_state    String?
   user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sourceCalendarSyncs CalendarSync[] @relation("SourceAccount")
+  targetCalendarSyncs CalendarSync[] @relation("TargetAccount")
 
   @@unique([provider, providerAccountId])
 }
@@ -52,7 +50,6 @@ model User {
   accounts              Account[]
   sessions              Session[]
   calendarSyncs         CalendarSync[]
-  calendarAccounts      CalendarAccount[]
   subscriptionId        String?
   subscriptionStatus    String?
   subscriptionExpiresAt DateTime?
@@ -61,6 +58,9 @@ model User {
 model CalendarSync {
   id                String   @id @default(cuid())
   userId            String
+  sourceAccountId   String
+  targetAccountId   String
+  sourceProvider    String   @default("google") // Default to Google
   sourceCalendarId  String
   targetCalendarId  String
   hideDetails       Boolean  @default(true)
@@ -70,28 +70,10 @@ model CalendarSync {
   roundToNearest    Int      @default(15)
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
+  webhookChannelId  String?
+  webhookExpiration DateTime?
   user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  sourceAccount     CalendarAccount @relation("SourceCalendar", fields: [sourceCalendarId], references: [calendarId])
-  targetAccount     CalendarAccount @relation("TargetCalendar", fields: [targetCalendarId], references: [calendarId])
-}
+  sourceAccount     Account  @relation("SourceAccount", fields: [sourceAccountId], references: [id])
+  targetAccount     Account  @relation("TargetAccount", fields: [targetAccountId], references: [id])
 
-model CalendarAccount {
-  id                String   @id @default(cuid())
-  userId            String
-  provider          String   // e.g., "google", "outlook", etc.
-  email             String
-  calendarId        String   @unique  // unique identifier for the calendar
-  name              String?  // display name for the calendar
-  color             String?  // calendar color
-  accessToken       String   @db.Text
-  refreshToken      String   @db.Text
-  tokenExpiresAt    DateTime
-  isDefault         Boolean  @default(false)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  sourceCalendars   CalendarSync[] @relation("SourceCalendar")
-  targetCalendars   CalendarSync[] @relation("TargetCalendar")
-
-  @@unique([userId, calendarId])
 }

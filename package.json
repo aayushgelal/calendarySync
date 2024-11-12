@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "ngrok": "ngrok http --url=sunny-glowworm-unduly.ngrok-free.app 3000",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"

@@ -8,5 +8,9 @@ declare module 'next-auth' {
       name: string;
       image?: string;
     };
+    accessToken?: string;
+    error?: string;
+    provider?:string;
   }
 }
+

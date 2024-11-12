@@ -15,6 +15,7 @@ export async function GET(req: Request) {
   const accountId = searchParams.get('accountId');
 
   try {
+    console.log(session.accessToken,session)
     // Fetch the calendar account based on accountId and provider
     const account = await prisma.account.findFirst({
       where: {
@@ -33,9 +34,9 @@ export async function GET(req: Request) {
     // Fetch calendars based on the provider
     let calendars;
     if (provider === 'azure-ad') {
-      calendars = await MicrosoftGraph.getCalendars(account.access_token!);
+      calendars = await MicrosoftGraph.getCalendars(session.accessToken!);
     } else if (provider === 'google') {
-      calendars = await GoogleCalendarAPI.getCalendars(account.access_token!);
+      calendars = await GoogleCalendarAPI.getCalendars(session.accessToken!);
     } else {
       return NextResponse.json({ error: 'Unsupported provider' }, { status: 400 });
     }
