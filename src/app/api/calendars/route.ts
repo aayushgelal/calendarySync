@@ -3,6 +3,7 @@ import { MicrosoftGraph, GoogleCalendarAPI } from '@/lib/api-client';
 import { getServerSession } from 'next-auth';
 import { prisma } from '@/lib/prisma';
 import { NextAuthOptions } from '../auth/[...nextauth]/route';
+import refreshAccessToken from '@/lib/refreshaccessToken';
 
 export async function GET(req: Request) {
   const session = await getServerSession(NextAuthOptions);
@@ -15,7 +16,6 @@ export async function GET(req: Request) {
   const accountId = searchParams.get('accountId');
 
   try {
-    console.log(session.accessToken,session)
     // Fetch the calendar account based on accountId and provider
     const account = await prisma.account.findFirst({
       where: {
@@ -31,6 +31,15 @@ export async function GET(req: Request) {
       }, { status: 404 });
     }
 
+
+    let accessToken = account.access_token;
+
+    // Check if the token is expired
+    const now = Math.floor(Date.now() / 1000);
+    if (account.expires_at && account.expires_at <= now) {
+      console.log(`Token expired for ${provider}, refreshing...`);
+      accessToken = await refreshAccessToken(account);
+    }
     // Fetch calendars based on the provider
     let calendars;
     if (provider === 'azure-ad') {
@@ -50,7 +59,7 @@ export async function GET(req: Request) {
     //   provider: account.provider,
     // }));
 
-    return NextResponse.json({ calendars: calendars }, { status: 200 });
+    return NextResponse.json({ calendars:calendars ,account:account }, { status: 200 });
   } catch (error) {
     console.error('Error fetching calendars:', error);
     return NextResponse.json({ error: 'Failed to fetch calendars' }, { status: 500 });

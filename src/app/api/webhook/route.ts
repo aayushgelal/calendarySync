@@ -49,7 +49,7 @@ export async function GET() {
             changeType: 'created,updated,deleted',
             notificationUrl: `${process.env.NEXTAUTH_URL}/api/webhook/microsoft`,
             resource: `me/calendars/${sync.sourceCalendarId}/events`,
-            expirationDateTime: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+            expirationDateTime: (Date.now() + 1 * 24 * 60 * 60 * 1000).toString(),
             clientState: process.env.WEBHOOK_VERIFICATION_TOKEN
           })
         });

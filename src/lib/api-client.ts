@@ -35,7 +35,8 @@ export class MicrosoftGraph {
         }
       });
       const data = await response.json();
-      return data.items.map((calendar: any) => ({ id: calendar.id, summary: calendar.summary }));
+      
+      return data.items.map((calendar: any) => ({ id: calendar.id, summary: calendar.summary}));
     }
   
     static async updateCalendar({ accessToken, calendarId, updates }: any) {

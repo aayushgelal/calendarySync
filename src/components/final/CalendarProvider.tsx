@@ -1,12 +1,7 @@
-"use client"
 import React, { useEffect, useState } from 'react';
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
-import { Loader2, AlertCircle, Calendar as CalendarIcon, Check, X } from "lucide-react";
+import { Loader2, AlertCircle, Calendar as CalendarIcon, Check } from "lucide-react";
 import { Calendar } from '@/types';
-
-
-
 
 type Connection = {
   connected: boolean;
@@ -40,11 +35,11 @@ const CalendarProvider: React.FC<{
         
         if (!response.ok) throw new Error(data.error || 'Failed to fetch calendars');
         
-        // Add accountId to each calendar
         const calendarsWithAccount = data.calendars.map((cal: any) => ({
           ...cal,
           accountId: connections[provider].accountId,
           provider,
+          name: provider==='azure-ad' ? cal.name : cal.summary
         }));
         
         setCalendars(calendarsWithAccount);
@@ -104,10 +99,7 @@ const CalendarProvider: React.FC<{
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <CalendarIcon className="h-4 w-4 text-gray-500" />
-              <div className="flex flex-col">
-                <span className="font-medium">{calendar.name}</span>
-                <span className="text-xs text-gray-500">Account ID: {calendar.accountId}</span>
-              </div>
+              <span className="font-medium">{calendar.name}</span>
             </div>
             {selectedId === calendar.id && (
               <Check className="h-4 w-4 text-blue-500" />

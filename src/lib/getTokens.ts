@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { google } from 'googleapis';
 import { getServerSession } from 'next-auth/next';
+import refreshAccessToken from './refreshaccessToken';
 
 // Helper function to get OAuth2 client for Google
 async function getGoogleOAuthClient(accountId: string) {
@@ -34,9 +35,19 @@ async function getMicrosoftAccessToken(accountId: string) {
 
   if (!account) {
     throw new Error('Account not found');
+ 
   }
+  let accessToken = account.access_token;
 
-  return account.access_token;
+    // Check if the token is expired
+  const now = Math.floor(Date.now() / 1000);
+    if (account.expires_at && account.expires_at <= now) {
+      console.log(`Token expired for ${account.provider}, refreshing...`);
+      accessToken = await refreshAccessToken(account);
+    }
+  
+
+  return accessToken;
 }
 
 export {getGoogleOAuthClient,getMicrosoftAccessToken}

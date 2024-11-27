@@ -12,7 +12,7 @@ datasource db {
 }
 
 model Account {
-  id                String  @id @default(cuid())
+  id                String  @id @default(cuid()) 
   userId            String
   type              String
   provider          String
@@ -61,6 +61,7 @@ model CalendarSync {
   sourceAccountId   String
   targetAccountId   String
   sourceProvider    String   @default("google") // Default to Google
+  targetProvider    String   @default("google") // Default to Google
   sourceCalendarId  String
   targetCalendarId  String
   hideDetails       Boolean  @default(true)

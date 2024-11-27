@@ -6,36 +6,39 @@ import { getMicrosoftAccessToken } from '@/lib/getTokens';
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
-    console.log('created')
-    
-    // Validate client state
-    if (body.clientState !== process.env.WEBHOOK_VERIFICATION_TOKEN) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const { searchParams } = new URL(req.url);
+    const validationToken=searchParams.get('validationToken');
 
-    // Validation request handling (Microsoft sends validation requests)
-    if (body.validationTokens) {
-      return new Response(body.validationTokens[0], { 
-        status: 200, 
-        headers: { 'Content-Type': 'text/plain' } 
+
+     if (validationToken) {
+      // Return the validation token in plain text
+      return new Response(validationToken, {
+        status: 200,
+        headers: { 'Content-Type': 'text/plain' },
       });
     }
+    const {value:body}=await req.json();
 
+    // Process notification events
+    console.log('Notification received:', body);
+  
     // Find sync configurations matching the calendar
-    const syncs = await prisma.calendarSync.findMany({
+    const sync = await prisma.calendarSync.findFirst({
       where: { 
-        sourceCalendarId: body.resourceData.id,
-        sourceProvider: 'microsoft'
+        webhookChannelId: body[0]!.subscriptionId,
+        sourceProvider: 'azure-ad'
       }
     });
+    
+    if(sync){
 
-    for (const sync of syncs) {
+
       // Get Microsoft access token
-      const accessToken = await getMicrosoftAccessToken(sync.sourceAccountId);
-
+      const accessToken = await getMicrosoftAccessToken(sync!.sourceAccountId);
+          // Check if the token is expired
+   
       // Fetch event details
-      const eventResponse = await fetch(`https://graph.microsoft.com/v1.0/me/events/${body.resourceData.id}`, {
+      const eventResponse = await fetch(`https://graph.microsoft.com/v1.0/me/events/${body[0].resourceData.id}`, {
         headers: { 'Authorization': `Bearer ${accessToken}` }
       });
       const event = await eventResponse.json();
@@ -44,7 +47,9 @@ export async function POST(req: Request) {
       await syncEventToTargetCalendar(sync, event);
     }
 
-    return NextResponse.json({ success: true });
+    
+
+    return NextResponse.json({ success: true,  },{status:200});
   } catch (error) {
     console.error('Microsoft Webhook Error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

@@ -93,12 +93,12 @@ export async function POST(req: Request) {
         workingHoursEnd: workingHoursEnd ?? '17:00',
         roundToNearest: roundToNearest ?? 15,
         sourceAccountId,
-        sourceProvider: targetProvider,
+        sourceProvider,
+        targetProvider,
         targetAccountId
         
       },
     });
-    console.log(sourceProvider)
 
     // Set up webhook based on source provider
     if (sourceProvider === 'google') {
@@ -134,7 +134,7 @@ export async function POST(req: Request) {
           webhookExpiration: new Date(parseInt(watchResponse.data.expiration || '0')),
         },
       });
-    } else if (sourceProvider === 'microsoft') {
+    } else if (sourceProvider === 'azure-ad') {
       // Microsoft Graph Change Notifications
       const accessToken = sourceAccount.access_token;
       
@@ -148,12 +148,13 @@ export async function POST(req: Request) {
           changeType: 'created,updated,deleted',
           notificationUrl: `${process.env.NEXTAUTH_URL}/api/webhook/microsoft`,
           resource: `me/calendars/${sourceCalendarId}/events`,
-          expirationDateTime: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-          clientState: process.env.WEBHOOK_VERIFICATION_TOKEN
+          expirationDateTime:new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
+          clientState: process.env.WEBHOOK_VERIFICATION_TOKEN,
         })
       });
 
       const subscriptionData = await subscriptionResponse.json();
+  
 
       // Store webhook details
       await prisma.calendarSync.update({
