@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server';
 import { MicrosoftGraph, GoogleCalendarAPI } from '@/lib/api-client';
 import { getServerSession } from 'next-auth';
 import { prisma } from '@/lib/prisma';
-import { NextAuthOptions } from '../auth/[...nextauth]/route';
+import { NextAuthOptions } from '@/utils/authOptions';
+
 import refreshAccessToken from '@/lib/refreshaccessToken';
 
 export async function GET(req: Request) {

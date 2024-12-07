@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
-import { NextAuthOptions } from '../../auth/[...nextauth]/route';
+import { NextAuthOptions } from '@/utils/authOptions';
 import { google } from 'googleapis';
 import { getGoogleOAuthClient, getMicrosoftAccessToken } from '@/lib/getTokens';
 

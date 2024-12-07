@@ -4,8 +4,11 @@ import { prisma } from '@/lib/prisma';
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { syncId: string } }
+  { params }: { params: Promise<{ syncId: string }> }
+
 ) {
+  const { syncId } = await params;
+
   const session = await getServerSession();
   
   if (!session) {
@@ -15,7 +18,7 @@ export async function DELETE(
   try {
     const sync = await prisma.calendarSync.findUnique({
       where: {
-        id: params.syncId,
+        id: syncId,
       },
     });
 
@@ -25,7 +28,7 @@ export async function DELETE(
 
     await prisma.calendarSync.delete({
       where: {
-        id: params.syncId,
+        id: syncId,
       },
     });
 

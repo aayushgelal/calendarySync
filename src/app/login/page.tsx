@@ -1,7 +1,8 @@
 import { getServerSession } from 'next-auth/next';
 import { redirect } from 'next/navigation';
 import { LoginButton } from '@/components/LoginButton';
-import { NextAuthOptions } from '../api/auth/[...nextauth]/route';
+import { NextAuthOptions } from '@/utils/authOptions';
+
 
 export default async function LoginPage() {
   const session = await getServerSession(NextAuthOptions);

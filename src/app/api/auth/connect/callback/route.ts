@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth/next"
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { NextAuthOptions } from "../../[...nextauth]/route"
+import { NextAuthOptions } from '@/utils/authOptions';
 import { stat } from "fs"
 
 async function exchangeGoogleToken(code: string) {
