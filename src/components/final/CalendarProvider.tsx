@@ -39,7 +39,7 @@ const CalendarProvider: React.FC<{
           ...cal,
           accountId: connections[provider].accountId,
           provider,
-          name: provider==='azure-ad' ? cal.name : cal.summary
+          name: provider === 'azure-ad' ? cal.name : cal.summary
         }));
         
         setCalendars(calendarsWithAccount);

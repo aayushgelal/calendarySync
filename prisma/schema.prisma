@@ -1,33 +1,32 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
 
 model Account {
-  id                String  @id @default(cuid()) 
-  userId            String
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
-  expires_at        Int?
-  ext_expires_in    Int?
-  token_type        String?
-  scope             String?
-  id_token         String? @db.Text
-  session_state    String?
-  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                  String         @id @default(cuid())
+  userId              String
+  type                String
+  provider            String
+  providerAccountId   String
+  refresh_token       String?
+  access_token        String?
+  expires_at          Int?
+  ext_expires_in      Int?
+  token_type          String?
+  scope               String?
+  id_token            String?
+  session_state       String?
+  user                User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   sourceCalendarSyncs CalendarSync[] @relation("SourceAccount")
   targetCalendarSyncs CalendarSync[] @relation("TargetAccount")
+  isSubAccount        Boolean        @default(false)
+  email               String?
 
   @@unique([provider, providerAccountId])
 }
@@ -41,40 +40,42 @@ model Session {
 }
 
 model User {
-  id                    String          @id @default(cuid())
+  id                    String         @id @default(cuid())
   name                  String?
-  email                 String?         @unique
+  email                 String?        @unique
   emailVerified         DateTime?
   image                 String?
-  access_token         String?
-  accounts              Account[]
-  sessions              Session[]
-  calendarSyncs         CalendarSync[]
+  access_token          String?
   subscriptionId        String?
   subscriptionStatus    String?
   subscriptionExpiresAt DateTime?
+  accounts              Account[]
+  calendarSyncs         CalendarSync[]
+  sessions              Session[]
 }
 
 model CalendarSync {
-  id                String   @id @default(cuid())
+  id                String    @id @default(cuid())
   userId            String
   sourceAccountId   String
   targetAccountId   String
-  sourceProvider    String   @default("google") // Default to Google
-  targetProvider    String   @default("google") // Default to Google
+  sourceProvider    String    @default("google")
   sourceCalendarId  String
   targetCalendarId  String
-  hideDetails       Boolean  @default(true)
-  weekdaysOnly      Boolean  @default(true)
-  workingHoursStart String   @default("09:00")
-  workingHoursEnd   String   @default("17:00")
-  roundToNearest    Int      @default(15)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  sourceCalendarName String?
+  targetCalendarName String?
+  hideDetails       Boolean   @default(true)
+  weekdaysOnly      Boolean   @default(true)
+  workingHoursStart String    @default("09:00")
+  workingHoursEnd   String    @default("17:00")
+  roundToNearest    Int       @default(15)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
   webhookChannelId  String?
   webhookExpiration DateTime?
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  sourceAccount     Account  @relation("SourceAccount", fields: [sourceAccountId], references: [id])
-  targetAccount     Account  @relation("TargetAccount", fields: [targetAccountId], references: [id])
-
+  webhookResourceId String?
+  targetProvider    String    @default("google")
+  sourceAccount     Account   @relation("SourceAccount", fields: [sourceAccountId], references: [id])
+  targetAccount     Account   @relation("TargetAccount", fields: [targetAccountId], references: [id])
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

@@ -62,6 +62,7 @@ export const NextAuthOptions: AuthOptions = {
             access_token: account.access_token,
             expires_at: account.expires_at,
             refresh_token: account.refresh_token,
+            email: user.email, 
           },
         });
       }

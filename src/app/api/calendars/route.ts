@@ -12,7 +12,7 @@ export async function GET(req: Request) {
   }
 
   const { searchParams } = new URL(req.url);
-  const provider = searchParams.get('provider');
+  const provider = searchParams.get('provider')
   const accountId = searchParams.get('accountId');
 
   try {
@@ -24,6 +24,7 @@ export async function GET(req: Request) {
         userId: session.user.id, // Ensure this is for the logged-in user
       },
     });
+    console.log(account)
 
     if (!account) {
       return NextResponse.json({
@@ -43,9 +44,9 @@ export async function GET(req: Request) {
     // Fetch calendars based on the provider
     let calendars;
     if (provider === 'azure-ad') {
-      calendars = await MicrosoftGraph.getCalendars(session.accessToken!);
+      calendars = await MicrosoftGraph.getCalendars(accessToken!);
     } else if (provider === 'google') {
-      calendars = await GoogleCalendarAPI.getCalendars(session.accessToken!);
+      calendars = await GoogleCalendarAPI.getCalendars(accessToken!);
     } else {
       return NextResponse.json({ error: 'Unsupported provider' }, { status: 400 });
     }

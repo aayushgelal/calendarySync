@@ -10,13 +10,14 @@ async function syncEventToTargetCalendar(sync: any, sourceEvent: any) {
 
 
 
-    // Determine if event should be synced based on sync settings
-    const isWeekday = new Date(sourceEvent.start.dateTime).getDay() >= 1 && 
-                      new Date(sourceEvent.start.dateTime).getDay() <= 5;
+    // // Determine if event should be synced based on sync settings
+    // const isWeekday = new Date(sourceEvent.start.dateTime).getDay() >= 1 && 
+    //                   new Date(sourceEvent.start.dateTime).getDay() <= 5;
     
-    if (sync.weekdaysOnly && !isWeekday) {
-      return; // Skip non-weekday events if configured
-    }
+    // if (sync.weekdaysOnly && !isWeekday) {
+    //   return; // Skip non-weekday events if configured
+    // }
+    console.log(sourceEvent)
   
     // Check working hours
     const startTime = new Date(sourceEvent.start.dateTime);
@@ -45,11 +46,11 @@ async function syncEventToTargetCalendar(sync: any, sourceEvent: any) {
       summary: sync.hideDetails ? 'Busy' : sourceEvent.subject,
       description: sync.hideDetails ? '' : sourceEvent.description,
       start: {
-        dateTime: startTime.toISOString(),
+        dateTime: sourceEvent.start.dateTime,
         timeZone: sourceEvent.start.timeZone
       },
       end: {
-        dateTime: new Date(sourceEvent.end.dateTime).toISOString(),
+        dateTime: sourceEvent.end.dateTime,
         timeZone: sourceEvent.end.timeZone
       }
     };
@@ -83,7 +84,7 @@ async function syncEventToTargetCalendar(sync: any, sourceEvent: any) {
         calendarId: sync.targetCalendarId,
         requestBody: targetEvent
       });
-    } else if (sync.targetProvider === 'azure-ad') {
+    } else if (sync.targetProvider == 'azure-ad') {
       const accessToken = await getMicrosoftAccessToken(sync.targetAccountId);
       const resultcalendar = await fetch("https://graph.microsoft.com/v1.0/me/calendars", {
   method: "GET",

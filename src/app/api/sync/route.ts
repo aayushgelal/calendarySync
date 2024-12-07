@@ -25,6 +25,9 @@ export async function POST(req: Request) {
       workingHoursStart,
       workingHoursEnd,
       roundToNearest,
+      sourceCalendarName,
+      targetCalendarName 
+  
     } = body;
 
     // Validate required fields
@@ -87,6 +90,8 @@ export async function POST(req: Request) {
         userId: session.user.id,
         sourceCalendarId,
         targetCalendarId,
+        sourceCalendarName,
+        targetCalendarName,
         hideDetails: hideDetails ?? true,
         weekdaysOnly: weekdaysOnly ?? true,
         workingHoursStart: workingHoursStart ?? '09:00',
@@ -131,6 +136,7 @@ export async function POST(req: Request) {
         where: { id: sync.id },
         data: {
           webhookChannelId: watchResponse.data.resourceId,
+          webhookResourceId: watchResponse.data.resourceId,
           webhookExpiration: new Date(parseInt(watchResponse.data.expiration || '0')),
         },
       });
@@ -161,6 +167,7 @@ export async function POST(req: Request) {
         where: { id: sync.id },
         data: {
           webhookChannelId: subscriptionData.id,
+          webhookResourceId: subscriptionData.resource,
           webhookExpiration: new Date(subscriptionData.expirationDateTime),
         },
       });

@@ -29,6 +29,7 @@ export async function POST(req: Request) {
         sourceProvider: 'azure-ad'
       }
     });
+    console.log(sync)
     
     if(sync){
 

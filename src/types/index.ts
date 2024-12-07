@@ -18,7 +18,17 @@
     accountId: string;
     hasValidToken: boolean;
   };
-
+ export type Account = {
+    id: string;
+    provider: string;
+    email: string;
+    isSubAccount: boolean;
+  };
+  
+export  type GroupedAccounts = {
+    google: Account[];
+    microsoft: Account[];
+  };
  
   
 export  type Connections = Record<string, Connection>;
