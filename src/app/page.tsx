@@ -1,5 +1,5 @@
 "use client"
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { signIn } from "next-auth/react";
 import Image from "next/image";
@@ -9,14 +9,28 @@ import FeaturesAndVideo from '@/components/landing/Features&Video';
 import Link from 'next/link';
 
 export default function LandingContent() {
+  const [email, setEmail] = useState("");
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    const response = await fetch("/api/beta", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    });
+    if (response.ok) {
+      alert("Email submitted successfully");
+    } else {
+      alert("Failed to submit email");
+    }
+    setEmail("");
+  };
+
   return (
     <div className="min-h-screen bg-white">
       {/* Navigation */}
       <nav className="fixed w-full bg-white/80 backdrop-blur-md z-50 border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <span className="text-2xl font-bold text-blue-600">CalSync</span>
+            <div className="flex items-center w-48">
+              <Image src="/logo.png" alt="SyncMyCal" className="object-contain" width={192} height={32} />
             </div>
             <div className="flex items-center gap-3">
               <Link href="#features">
@@ -104,11 +118,13 @@ export default function LandingContent() {
               Be among the first to try our advanced calendar synchronization features.
               Limited spots available!
             </p>
-            <form className="space-y-4">
+            <form className="space-y-4" onSubmit={handleSubmit}>
               <input
                 type="email"
                 placeholder="Enter your email"
                 className="w-full p-3 rounded-lg text-slate-900"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
               />
               <Button size="lg" variant="secondary" className="w-full">
                 Join Beta
@@ -123,7 +139,7 @@ export default function LandingContent() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-4 gap-8">
             <div>
-              <h3 className="text-lg font-semibold mb-4">CalSync</h3>
+              <h3 className="text-lg font-semibold mb-4">SyncMyCal</h3>
               <p className="text-slate-400">
                 Seamless calendar synchronization for busy professionals.
               </p>
@@ -154,7 +170,7 @@ export default function LandingContent() {
             </div>
           </div>
           <div className="border-t border-slate-800 mt-8 pt-8 text-center text-slate-400">
-            <p>© 2024 CalSync. All rights reserved.</p>
+            <p>© 2024 SyncMyCal. All rights reserved.</p>
           </div>
         </div>
       </footer>

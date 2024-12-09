@@ -3,11 +3,12 @@ import React from 'react';
 import { Button } from "@/components/ui/button";
 import { CalendarDays, Users, PlusCircle, Settings, LogOut } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { redirect, usePathname } from 'next/navigation';
 import { Navbar } from '@/components/Navbar';
 import { useSession,signOut } from 'next-auth/react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Toaster } from 'react-hot-toast';
+import Image from 'next/image';
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname();
@@ -20,7 +21,9 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       .join('')
       .toUpperCase();
   };
-
+  if(!session) {
+    redirect('/')
+  }
 
 
   const menuItems = [
@@ -53,8 +56,8 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       <div className="w-64 bg-white border-r border-gray-200">
         <div className="flex flex-col h-full">
           {/* Logo/Brand */}
-          <div className="p-4 border-b border-gray-200">
-            <h1 className="text-xl font-bold">CalSync</h1>
+          <div className="p-4 border-b border-gray-200 object-fill">
+            <Image src="/logo.png" alt="SyncMyCal" className="object-fill" width={200} height={10} />
           </div>
 
           {/* Navigation */}

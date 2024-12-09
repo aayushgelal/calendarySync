@@ -95,7 +95,7 @@ export default function FeaturesAndVideo() {
             <div className="aspect-video rounded-2xl overflow-hidden bg-gray-100 relative group cursor-pointer">
               <Image
                 src="/video-thumbnail.jpg" // Add your thumbnail image
-                alt="How CalSync Works"
+                alt="How SyncMyCal Works"
                 fill
                 className="object-cover transition-transform group-hover:scale-105"
               />
@@ -115,7 +115,7 @@ export default function FeaturesAndVideo() {
               </div>
             </div>
 
-            {/* Video Stats */}
+            {/* Video Stats
             <div className="absolute -bottom-8 left-8 right-8">
               <div className="bg-white rounded-xl shadow-lg p-4 grid grid-cols-3 gap-4">
                 {[
@@ -132,8 +132,8 @@ export default function FeaturesAndVideo() {
                     </div>
                   </div>
                 ))}
-              </div>
-            </div>
+              </div> */}
+            {/* </div> */}
           </motion.div>
         </div>
       </div>

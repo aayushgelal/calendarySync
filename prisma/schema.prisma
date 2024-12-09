@@ -79,3 +79,9 @@ model CalendarSync {
   targetAccount     Account   @relation("TargetAccount", fields: [targetAccountId], references: [id])
   user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
+
+model Beta {
+  id String @id @default(cuid())
+  email String @unique
+  createdAt DateTime @default(now())
+}

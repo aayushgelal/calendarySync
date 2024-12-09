@@ -12,7 +12,7 @@ const poppins = Poppins({
 
 
 export const metadata: Metadata = {
-  title: "CalSync - Seamless Calendar Synchronization",
+  title: "SyncMyCal - Seamless Calendar Synchronization",
   description: "Sync your Google and Microsoft calendars effortlessly. Multiple accounts, real-time updates, and complete control.",
 };
 
