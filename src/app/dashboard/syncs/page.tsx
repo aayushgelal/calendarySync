@@ -4,89 +4,22 @@ import { Loader2, ArrowRight, Eye, EyeOff, Trash2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import toast from 'react-hot-toast';
+import { useSyncStore } from '@/store/syncStore';
 
-type CalendarSync = {
-  id: string;
-  sourceCalendarName: string;
-  targetCalendarName: string;
-  sourceAccount: {
-    email: string;
-  };
-  targetAccount: {
-    email: string;
-  };
-  hideDetails: boolean;
-};
 
 const ActiveSyncsPage = () => {
-  const [syncs, setSyncs] = useState<CalendarSync[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { syncs, loading, fetchSyncs, toggleHideDetails, deleteSync } = useSyncStore();
+  
+
+
 
   useEffect(() => {
     fetchSyncs();
   }, []);
 
-const fetchSyncs = async () => {
-  toast.loading('Loading syncs...');
-    try {
-      const response = await fetch('/api/active-syncs');
-      if (!response.ok) throw new Error('Failed to fetch syncs');
-      const data = await response.json();
-      setSyncs(data);
-      toast.dismiss();
-    } catch (err) {
-      console.error('Failed to fetch syncs:', err);
-      toast.error('Failed to load syncs');
-    } finally {
-      setLoading(false);
-    }
-  };
-  
-  const toggleHideDetails = async (syncId: string, currentValue: boolean) => {
-    toast.loading('Updating sync...');
-    try {
-      const response = await fetch(`/api/active-syncs/${syncId}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ hideDetails: !currentValue }),
-      });
-      toast.dismiss();
-      if (!response.ok) toast.error('Failed to update sync');
-      const updatedSync = await response.json();
-  
-      setSyncs(syncs.map(sync => 
-        sync.id === syncId ? updatedSync : sync
-      ));
-  
-      toast.success('Updated successfully');
-    } catch (error) {
-      console.error('Error updating sync:', error);
-      toast.error('Failed to update sync');
-    }
-  };
-  
-  const deleteSync = async (syncId: string) => {
-    if (!confirm('Are you sure you want to delete this sync?')) return;
-    toast.loading('Deleting sync...');
-  
-    try {
-      const response = await fetch(`/api/active-syncs/${syncId}`, {
-        method: 'DELETE',
-      });
-      toast.dismiss();
 
-      if (!response.ok) toast.error('Failed to delete sync');
   
-      setSyncs(syncs.filter(sync => sync.id !== syncId));
-      toast.success('Sync deleted successfully');
-    } catch (error) {
-      console.error('Error deleting sync:', error);
-      toast.error('Failed to delete sync');
-    }
-  };
+  
 
   if (loading) {
     return (

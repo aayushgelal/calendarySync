@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, AlertCircle, Calendar as CalendarIcon, Check } from "lucide-react";
 import { Calendar } from '@/types';
+import { useCalendarStore } from '@/store/calendarStore';
 
 type Connection = {
   connected: boolean;
@@ -18,40 +19,41 @@ const CalendarProvider: React.FC<{
   excludeAccountIds?: string[];
   connections: Connections;
 }> = ({ provider, onSelect, selectedId, excludeAccountIds = [], connections }) => {
-  const [calendars, setCalendars] = useState<Calendar[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { 
+    calendars, 
+    loading, 
+    fetchCalendars,
+    setSelectedSource,
+    setSelectedTarget,
+    selectedSource,
+    selectedTarget
+  } = useCalendarStore();
 
   useEffect(() => {
-    const fetchCalendars = async () => {
-      if (!connections[provider]?.connected || !connections[provider]?.hasValidToken) {
-        return;
-      }
+    if (!connections[provider]?.connected || !connections[provider]?.hasValidToken) {
+      return;
+    }
 
-      setLoading(true);
-      try {
-        const response = await fetch(`/api/calendars?provider=${provider}&accountId=${connections[provider].accountId}`);
-        const data = await response.json();
-        
-        if (!response.ok) throw new Error(data.error || 'Failed to fetch calendars');
-        
-        const calendarsWithAccount = data.calendars.map((cal: any) => ({
-          ...cal,
-          accountId: connections[provider].accountId,
-          provider,
-          name: provider === 'azure-ad' ? cal.name : cal.summary
-        }));
-        
-        setCalendars(calendarsWithAccount);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to fetch calendars');
-      } finally {
-        setLoading(false);
-      }
-    };
+    fetchCalendars(connections[provider].accountId, provider);
+  }, [provider, connections, fetchCalendars]);
 
-    fetchCalendars();
-  }, [provider, connections]);
+  const handleSelect = (calendar: Calendar) => {
+    if (onSelect) {
+      onSelect(calendar);
+    }
+    
+    if (selectedId === selectedSource?.id) {
+      setSelectedSource(calendar);
+    } else if (selectedId === selectedTarget?.id) {
+      setSelectedTarget(calendar);
+    }
+  };
+
+  console.log('Calendars from store:', calendars);
+  console.log('Current provider account:', connections[provider]?.accountId);
+  
+  const accountCalendars = calendars[connections[provider]?.accountId] || [];
+  console.log('Filtered account calendars:', accountCalendars);
 
   if (!connections[provider]?.connected) {
     return (
@@ -72,16 +74,7 @@ const CalendarProvider: React.FC<{
     );
   }
 
-  if (error) {
-    return (
-      <Alert variant="destructive">
-        <AlertCircle className="h-4 w-4" />
-        <AlertDescription>{error}</AlertDescription>
-      </Alert>
-    );
-  }
-
-  const filteredCalendars = calendars.filter(
+  const filteredCalendars = accountCalendars.filter(
     cal => !excludeAccountIds.includes(cal.accountId)
   );
 
@@ -94,7 +87,7 @@ const CalendarProvider: React.FC<{
             ${selectedId === calendar.id 
               ? 'border-blue-500 bg-blue-50' 
               : 'border-gray-200 hover:border-blue-200'}`}
-          onClick={() => onSelect?.(calendar)}
+          onClick={() => handleSelect(calendar)}
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">

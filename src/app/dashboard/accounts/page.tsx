@@ -5,6 +5,7 @@ import { Account, GroupedAccounts, Connections } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { AddAccountButton } from '@/components/final/AddAccountButton';
+import { useAccountStore } from '@/store/accountStore';
 
 
   
@@ -70,52 +71,9 @@ import { AddAccountButton } from '@/components/final/AddAccountButton';
   };
   
 const ProvidersPage = () => {
-  const [accounts, setAccounts] = useState<GroupedAccounts>({
-    google: [],
-    microsoft: [],
-  });
-  const [loading, setLoading] = useState(true);
-  const [connections, setConnections] = useState<Connections>({
-    google: { connected: false, accountId: '', hasValidToken: false },
-    microsoft: { connected: false, accountId: '', hasValidToken: false }
-  });
+  const { accounts, connections, loading, fetchAccounts } = useAccountStore();
 
   useEffect(() => {
-    const fetchAccounts = async () => {
-      try {
-        const response = await fetch('/api/accounts');
-        const data: Account[] = await response.json();
-        
-        // Group accounts by provider
-        const grouped = data.reduce((acc, account) => {
-          const provider = account.provider === "azure-ad" ? "microsoft" : "google";
-          acc[provider].push(account);
-          return acc;
-        }, { google: [], microsoft: [] } as GroupedAccounts);
-        
-        // Create connections object
-        const newConnections = data.reduce((acc, account) => {
-          const provider = account.provider === "azure-ad" ? "microsoft" : "google";
-          acc[provider] = {
-            connected: true,
-            accountId: account.id,
-            hasValidToken: true
-          };
-          return acc;
-        }, {
-          google: { connected: false, accountId: '', hasValidToken: false },
-          microsoft: { connected: false, accountId: '', hasValidToken: false }
-        });
-
-        setAccounts(grouped);
-        setConnections(newConnections);
-      } catch (err) {
-        console.error('Failed to fetch accounts:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchAccounts();
   }, []);
 

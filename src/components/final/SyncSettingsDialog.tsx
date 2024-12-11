@@ -30,7 +30,7 @@ type SyncSettings = {
 type SyncSettingsDialogProps = {
   settings: SyncSettings;
   onSettingsChange: (settings: SyncSettings) => void;
-  onConfirm: () => void;
+  onConfirm: () => Promise<void>;
 };
 
 const SyncSettingsDialog: React.FC<SyncSettingsDialogProps> = ({
@@ -38,6 +38,14 @@ const SyncSettingsDialog: React.FC<SyncSettingsDialogProps> = ({
   onSettingsChange,
   onConfirm,
 }) => {
+  const handleConfirm =async () => {
+    toast.loading("Syncing events...");
+
+    await onConfirm();
+    toast.dismiss();
+    toast.success('Sync started');
+
+  };
 
   return (
     <Dialog>
@@ -134,7 +142,7 @@ const SyncSettingsDialog: React.FC<SyncSettingsDialogProps> = ({
             </Select>
           </div>
 
-          <Button className="w-full" onClick={onConfirm}>
+          <Button className="w-full" onClick={handleConfirm}>
             Confirm and Start Sync
           </Button>
         </div>

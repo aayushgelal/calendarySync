@@ -1,5 +1,5 @@
 "use client"
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
@@ -8,8 +8,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import CalendarProvider from './CalendarProvider';
+import { useCalendarStore } from '@/store/calendarStore';
 import { Calendar } from '@/types';
+import { Loader2 } from 'lucide-react';
 
 type Account = {
   id: string;
@@ -21,42 +22,61 @@ type Account = {
 type AccountCalendarSelectorProps = {
   accounts: Account[];
   label: string;
-  onCalendarSelect: (calendar: Calendar | null) => void;
+  isSource?: boolean;
 };
 
 const AccountCalendarSelector: React.FC<AccountCalendarSelectorProps> = ({
   accounts,
   label,
-  onCalendarSelect,
+  isSource = false,
 }) => {
-  const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
-  const [selectedCalendarId, setSelectedCalendarId] = useState<string | null>(null);
+  const { 
+    calendars,
+    loading,
+    selectedSource,
+    selectedTarget,
+    fetchCalendars,
+    setSelectedSource,
+    setSelectedTarget
+  } = useCalendarStore();
 
-  const handleAccountChange = useCallback(
-    (accountId: string) => {
-      const account = accounts.find((a) => a.id === accountId) || null;
-      setSelectedAccount(account);
-      setSelectedCalendarId(null);
-      onCalendarSelect(null);
-    },
-    [accounts, onCalendarSelect]
-  );
+  // Add state for current account
+  const [currentAccountId, setCurrentAccountId] = React.useState<string | null>(null);
+
+  const selectedCalendar = isSource ? selectedSource : selectedTarget;
+  const currentAccount = accounts.find(a => a.id === currentAccountId);
+
+  const handleAccountChange = useCallback(async (accountId: string) => {
+    const account = accounts.find((a) => a.id === accountId);
+    if (!account) return;
+
+    console.log('Account selected:', account);
+    setCurrentAccountId(accountId); // Set the current account
+
+    // Reset calendar selection
+    if (isSource) {
+      setSelectedSource(null);
+    } else {
+      setSelectedTarget(null);
+    }
+
+    // Fetch calendars if not already cached
+    if (!calendars[accountId]) {
+      console.log('Fetching calendars for account:', accountId);
+      await fetchCalendars(accountId, account.provider);
+    }
+  }, [accounts, calendars, fetchCalendars, setSelectedSource, setSelectedTarget, isSource]);
+
+  console.log('Rendering with selectedAccount:', currentAccount);
+  console.log('Available calendars:', calendars[currentAccount?.id || '']);
 
   const handleCalendarSelect = useCallback((calendar: Calendar) => {
-    setSelectedCalendarId(calendar.id);
-    onCalendarSelect(calendar);
-  }, [onCalendarSelect]);
-
-  const connections = useMemo(() => {
-    if (!selectedAccount) return {};
-    return {
-      [selectedAccount.provider]: {
-        connected: true,
-        accountId: selectedAccount.id,
-        hasValidToken: true,
-      },
-    };
-  }, [selectedAccount]);
+    if (isSource) {
+      setSelectedSource(calendar );
+    } else {
+      setSelectedTarget(calendar);
+    }
+  }, [setSelectedSource, setSelectedTarget, isSource]);
 
   return (
     <Card>
@@ -65,7 +85,7 @@ const AccountCalendarSelector: React.FC<AccountCalendarSelectorProps> = ({
       </CardHeader>
       <CardContent>
         <Select
-          value={selectedAccount?.id}
+          value={currentAccountId || ''} // Use currentAccountId instead of selectedAccount
           onValueChange={handleAccountChange}
         >
           <SelectTrigger>
@@ -80,14 +100,29 @@ const AccountCalendarSelector: React.FC<AccountCalendarSelectorProps> = ({
           </SelectContent>
         </Select>
 
-        {selectedAccount && (
+        {currentAccount && ( // Use currentAccount instead of selectedAccount
           <div className="mt-4">
-            <CalendarProvider
-              provider={selectedAccount.provider}
-              onSelect={handleCalendarSelect}
-              selectedId={selectedCalendarId!}
-              connections={connections}
-            />
+            {loading ? (
+              <div className="flex justify-center py-4">
+                <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {calendars[currentAccount.id]?.map((calendar) => (
+                  <button
+                    key={calendar.id}
+                    onClick={() => handleCalendarSelect(calendar)}
+                    className={`w-full text-left px-3 py-2 rounded ${
+                      selectedCalendar?.id === calendar.id
+                        ? 'bg-blue-100 text-blue-700'
+                        : 'hover:bg-gray-100'
+                    }`}
+                  >
+                    {calendar.name}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </CardContent>

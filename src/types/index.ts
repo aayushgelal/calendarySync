@@ -11,6 +11,7 @@
     name: string;
     provider: string;
     accountId: string;
+    accessRole: string;
   };
   
  export  type Connection = {
