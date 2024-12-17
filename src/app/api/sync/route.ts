@@ -78,7 +78,9 @@ export async function POST(req: Request) {
       },
     });
 
-    if (existingSync) {
+    // Check if a webhook already exists for this sync
+    if (existingSync && existingSync.webhookChannelId) {
+      console.log('Webhook already exists for this sync:', existingSync.webhookChannelId);
       return NextResponse.json(
         { error: 'A sync already exists for these calendars' },
         { status: 400 }
@@ -120,27 +122,35 @@ export async function POST(req: Request) {
 
       const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
 
-      // Set up watch for calendar changes
-      const watchResponse = await calendar.events.watch({
-        calendarId: sourceCalendarId,
-        requestBody: {
-          id: sync.id.toString(),
-          type: 'web_hook',
-          address: `${process.env.NEXTAUTH_URL}/api/webhook/google`,
-          token: process.env.WEBHOOK_VERIFICATION_TOKEN,
-          expiration: (Date.now() + 7 * 24 * 60 * 60 * 1000).toString(), // 7 days from now
-        },
+      // Check if webhook already exists
+      const existingWebhook = await prisma.calendarSync.findUnique({
+        where: { id: sync.id },
+        select: { webhookChannelId: true },
       });
 
-      // Store webhook details
-      await prisma.calendarSync.update({
-        where: { id: sync.id },
-        data: {
-          webhookChannelId: watchResponse.data.resourceId,
-          webhookResourceId: watchResponse.data.resourceId,
-          webhookExpiration: new Date(parseInt(watchResponse.data.expiration || '0')),
-        },
-      });
+      if (!existingWebhook?.webhookChannelId) {
+        // Set up watch for calendar changes
+        const watchResponse = await calendar.events.watch({
+          calendarId: sourceCalendarId,
+          requestBody: {
+            id: sync.id.toString(),
+            type: 'web_hook',
+            address: `${process.env.NEXTAUTH_URL}/api/webhook/google`,
+            token: process.env.WEBHOOK_VERIFICATION_TOKEN,
+            expiration: (Date.now() + 7 * 24 * 60 * 60 * 1000).toString(), // 7 days from now
+          },
+        });
+
+        // Store webhook details
+        await prisma.calendarSync.update({
+          where: { id: sync.id },
+          data: {
+            webhookChannelId: watchResponse.data.resourceId,
+            webhookResourceId: watchResponse.data.resourceId,
+            webhookExpiration: new Date(parseInt(watchResponse.data.expiration || '0')),
+          },
+        });
+      }
     } else if (sourceProvider === 'azure-ad') {
       // Microsoft Graph Change Notifications
       const accessToken = sourceAccount.access_token;

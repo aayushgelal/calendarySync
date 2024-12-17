@@ -76,7 +76,7 @@ export default function LandingContent() {
               Connect and sync your Google and Microsoft calendars effortlessly.
               Perfect for managing multiple calendars across different platforms.
             </p>
-            <div className="flex justify-center gap-4">
+            <div className="flex justify-center gap-4 px-4">
               <Button
                 onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
                 size="lg"
