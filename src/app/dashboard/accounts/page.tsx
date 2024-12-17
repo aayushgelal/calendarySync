@@ -6,6 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { AddAccountButton } from '@/components/final/AddAccountButton';
 import { useAccountStore } from '@/store/accountStore';
+import { DeleteAccountButton } from '@/components/final/DeleteAccountButton';
+import toast from 'react-hot-toast';
 
 
   
@@ -22,6 +24,8 @@ import { useAccountStore } from '@/store/accountStore';
             </div>
             <Badge variant="default" className="flex items-center">
               <Check className="mr-1 h-3 w-3" /> Connected
+              <DeleteAccountButton accountId={account.id} email={account.email} onDelete={() => {toast.success('Account deleted successfully')}} />
+
             </Badge>
           </>
         ) : (
@@ -56,6 +60,7 @@ import { useAccountStore } from '@/store/accountStore';
             accounts.map((account) => (
               <div key={account.id}>
                 <ConnectionStatus account={account} />
+
               
               </div>
             ))

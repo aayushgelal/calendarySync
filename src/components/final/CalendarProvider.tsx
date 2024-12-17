@@ -3,6 +3,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, AlertCircle, Calendar as CalendarIcon, Check } from "lucide-react";
 import { Calendar } from '@/types';
 import { useCalendarStore } from '@/store/calendarStore';
+import { useRouter } from 'next/navigation';
+import { toast } from 'react-hot-toast';
 
 type Connection = {
   connected: boolean;
@@ -28,14 +30,23 @@ const CalendarProvider: React.FC<{
     selectedSource,
     selectedTarget
   } = useCalendarStore();
+  const router = useRouter();
 
   useEffect(() => {
-    if (!connections[provider]?.connected || !connections[provider]?.hasValidToken) {
-      return;
-    }
+    const fetchData = async () => {
+      try {
+        await fetchCalendars(connections[provider].accountId, provider);
+      } catch (error) {
+        if (error instanceof Error && error.message.includes('AUTH_REQUIRED')) {
+          toast.error('Please reconnect your account');
+          // Redirect to re-auth or show re-auth button
+          router.push(`/auth/reconnect?provider=${provider}`);
+        }
+      }
+    };
 
-    fetchCalendars(connections[provider].accountId, provider);
-  }, [provider, connections, fetchCalendars]);
+    fetchData();
+  }, [provider, connections]);
 
   const handleSelect = (calendar: Calendar) => {
     if (onSelect) {

@@ -73,6 +73,7 @@ model CalendarSync {
   updatedAt         DateTime  @updatedAt
   webhookChannelId  String?
   webhookExpiration DateTime?
+  status            String    @default("ACTIVE")
   webhookResourceId String?
   targetProvider    String    @default("google")
   sourceAccount     Account   @relation("SourceAccount", fields: [sourceAccountId], references: [id])

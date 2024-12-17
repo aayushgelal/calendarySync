@@ -63,7 +63,15 @@ export async function GET(req: Request) {
 
     return NextResponse.json({ calendars:calendars ,account:account }, { status: 200 });
   } catch (error) {
-    console.error('Error fetching calendars:', error);
-    return NextResponse.json({ error: 'Failed to fetch calendars' }, { status: 500 });
+    if (error instanceof Error && error.message === 'AUTH_REQUIRED') {
+      return NextResponse.json(
+        { error: 'Authentication required', code: 'AUTH_REQUIRED' }, 
+        { status: 401 }
+      );
+    }
+    return NextResponse.json(
+      { error: 'Failed to fetch calendars' }, 
+      { status: 500 }
+    );
   }
 }

@@ -13,10 +13,9 @@ const NextAuthOptions: AuthOptions= {
         clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
         authorization: {
           params: {
-            scope: 'https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/calendar.events openid email profile',
-            prompt: 'consent',
             access_type: 'offline',
-            response_type: 'code'
+            prompt: 'consent',
+            scope: 'https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/calendar.events openid email profile',
           }
         }
       }),

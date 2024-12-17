@@ -15,6 +15,8 @@ async function exchangeGoogleToken(code: string) {
       client_secret: process.env.GOOGLE_CLIENT_SECRET!,
       redirect_uri: `${process.env.NEXTAUTH_URL}/api/auth/connect/callback`,
       grant_type: 'authorization_code',
+      access_type: 'offline',
+      prompt: 'consent'
     }),
   })
 
@@ -36,6 +38,7 @@ async function exchangeMicrosoftToken(code: string) {
       client_secret: process.env.AZURE_AD_CLIENT_SECRET!,
       redirect_uri: `${process.env.NEXTAUTH_URL}/api/auth/connect/callback`,
       grant_type: 'authorization_code',
+      scope: 'offline_access openid email profile Mail.Send https://graph.microsoft.com/Calendars.ReadWrite https://graph.microsoft.com/Calendars.ReadWrite.Shared'
     }),
   })
 
