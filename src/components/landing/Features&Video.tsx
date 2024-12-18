@@ -5,8 +5,7 @@ import {
   RefreshCcw, 
   Shield, 
   Zap,
-  Calendar,
-  Play
+  Calendar
 } from "lucide-react";
 import Image from "next/image";
 
@@ -85,7 +84,7 @@ export default function FeaturesAndVideo() {
             </div>
           </div>
 
-          {/* Video Card Column */}
+          {/* Video Column */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -93,18 +92,17 @@ export default function FeaturesAndVideo() {
             className="relative"
           >
             <div className="aspect-video rounded-2xl overflow-hidden bg-gray-100 relative group cursor-pointer">
-              <Image
-                src="/video-thumbnail.jpg" // Add your thumbnail image
-                alt="How SyncMyCal Works"
-                fill
-                className="object-cover transition-transform group-hover:scale-105"
+              <iframe
+                src="https://player.vimeo.com/video/1040452397?autoplay=1&muted=1"
+                width="640"
+                height="360"
+                className="w-full h-full"
+                frameBorder="0"
+                allow="autoplay; fullscreen; picture-in-picture"
+                allowFullScreen
+                title="How SyncMyCal Works"
               />
-              <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors" />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <Play className="h-6 w-6 text-blue-600 ml-1" />
-                </div>
-              </div>
+              <div className="absolute inset-0 group-hover:bg-black/40 transition-colors" />
               <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 to-transparent">
                 <h3 className="text-white text-xl font-semibold font-poppins">
                   See how it works
@@ -114,26 +112,6 @@ export default function FeaturesAndVideo() {
                 </p>
               </div>
             </div>
-
-            {/* Video Stats
-            <div className="absolute -bottom-8 left-8 right-8">
-              <div className="bg-white rounded-xl shadow-lg p-4 grid grid-cols-3 gap-4">
-                {[
-                  { label: "Active Users", value: "2,000+" },
-                  { label: "Calendars Synced", value: "5,000+" },
-                  { label: "Events/Month", value: "50k+" }
-                ].map((stat, index) => (
-                  <div key={index} className="text-center">
-                    <div className="font-bold text-gray-900 font-poppins">
-                      {stat.value}
-                    </div>
-                    <div className="text-sm text-gray-600 font-poppins">
-                      {stat.label}
-                    </div>
-                  </div>
-                ))}
-              </div> */}
-            {/* </div> */}
           </motion.div>
         </div>
       </div>
