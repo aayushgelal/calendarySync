@@ -151,10 +151,10 @@ async function syncEventToTargetCalendar(sync: any, sourceEvent: any) {
       isAfter(startTime, workingStartTime) && 
       isBefore(startTime, workingEndTime);
     
-    if (!isWithinWorkingHours && sync.workingHoursStart !== '00:00' && sync.workingHoursEnd !== '00:00') {
-      console.log('Skipping event outside working hours');
-      return; // Skip events outside working hours if configured
-    }
+    // if (!isWithinWorkingHours && sync.workingHoursStart !== '00:00' && sync.workingHoursEnd !== '00:00') {
+    //   console.log('Skipping event outside working hours');
+    //   return; // Skip events outside working hours if configured
+    // }
 
     // Apply time rounding if configured
     let roundedStartTime = new Date(startTime);
