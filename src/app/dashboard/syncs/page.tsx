@@ -1,27 +1,25 @@
-"use client"
-import React, { useEffect, useState } from 'react';
-import { Loader2, ArrowRight, Eye, EyeOff, Trash2 } from "lucide-react";
+"use client";
+import React, { useEffect } from "react";
+import { Loader2, ArrowRight, Eye, EyeOff, Trash2, RefreshCw } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { useSyncStore } from '@/store/syncStore';
-
+import { useSyncStore } from "@/store/syncStore";
 
 const ActiveSyncsPage = () => {
   const { syncs, loading, fetchSyncs, toggleHideDetails, deleteSync } = useSyncStore();
-  
-
-
 
   useEffect(() => {
+    if (syncs.length === 0) {
+      fetchSyncs();
+    }
+  }, [syncs.length, fetchSyncs]); // Only run if syncs is empty
+
+  const handleRefresh = () => {
     fetchSyncs();
-  }, []);
+  };
 
-
-  
-  
-
-  if (loading) {
+  if (loading && syncs.length === 0) {
     return (
       <div className="flex justify-center items-center h-screen">
         <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
@@ -33,8 +31,11 @@ const ActiveSyncsPage = () => {
     <div className="max-w-4xl mx-auto p-6 space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Active Syncs</h1>
+        <Button onClick={handleRefresh} variant="outline" className="flex items-center gap-2">
+          <RefreshCw className="h-5 w-5" /> Refresh
+        </Button>
       </div>
-      
+
       <div className="grid gap-4">
         {syncs.length > 0 ? (
           syncs.map((sync) => (
@@ -46,9 +47,7 @@ const ActiveSyncsPage = () => {
                       <p className="font-medium">{sync.sourceAccount.email}</p>
                       <p className="text-sm text-gray-500">{sync.sourceCalendarName}</p>
                     </div>
-                    
                     <ArrowRight className="h-5 w-5 text-gray-400" />
-                    
                     <div className="flex-1">
                       <p className="font-medium">{sync.targetAccount.email}</p>
                       <p className="text-sm text-gray-500">{sync.targetCalendarName}</p>
