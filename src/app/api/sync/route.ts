@@ -145,7 +145,7 @@ export async function POST(req: Request) {
         await prisma.calendarSync.update({
           where: { id: sync.id },
           data: {
-            webhookChannelId: watchResponse.data.resourceId,
+            webhookChannelId: watchResponse.data.id,
             webhookResourceId: watchResponse.data.resourceId,
             webhookExpiration: new Date(parseInt(watchResponse.data.expiration || '0')),
           },
