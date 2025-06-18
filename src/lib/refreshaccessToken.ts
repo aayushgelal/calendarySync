@@ -43,6 +43,14 @@ async function refreshAccessToken(account: any) {
   
       const responseData = await response.json();
 
+      console.log('Token refresh response:', {
+        status: response.status,
+        hasAccessToken: !!responseData.access_token,
+        hasRefreshToken: !!responseData.refresh_token,
+        expiresIn: responseData.expires_in,
+        error: responseData.error
+      });
+
       if (!response.ok) {
         console.error('Token refresh failed:', {
           status: response.status,
@@ -64,6 +72,18 @@ async function refreshAccessToken(account: any) {
       }
 
       console.log('Successfully refreshed token');
+
+      // Prepare update data - only include fields that have valid values
+      const updateData: any = {
+        access_token: responseData.access_token,
+        expires_at: Math.floor(Date.now() / 1000) + (responseData.expires_in || 3600),
+      };
+
+      // Only update refresh_token if we got a new one that's not null/undefined
+      // Microsoft often doesn't return a new refresh token if the existing one is still valid
+      if (responseData.refresh_token && responseData.refresh_token !== null) {
+        updateData.refresh_token = responseData.refresh_token;
+      }
   
       // Update the account in the database
       await prisma.account.update({
@@ -73,11 +93,7 @@ async function refreshAccessToken(account: any) {
             providerAccountId: account.providerAccountId,
           },
         },
-        data: {
-          access_token: responseData.access_token,
-          expires_at: Math.floor(Date.now() / 1000) + (responseData.expires_in || 3600),
-          refresh_token: responseData.refresh_token || account.refresh_token,
-        },
+        data: updateData,
       });
   
       return responseData.access_token;
