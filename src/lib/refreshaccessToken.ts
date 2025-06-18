@@ -23,7 +23,7 @@ async function refreshAccessToken(account: any) {
           client_secret: process.env.AZURE_AD_CLIENT_SECRET!,
           refresh_token: account.refresh_token!,
           grant_type: 'refresh_token',
-          scope: 'openid offline_access https://graph.microsoft.com/calendars.read https://graph.microsoft.com/calendars.readwrite'
+          scope: 'openid email profile offline_access Mail.Send https://graph.microsoft.com/Calendars.ReadWrite https://graph.microsoft.com/Calendars.ReadWrite.Shared'
         });
       } else {
         throw new Error('Unsupported provider');
